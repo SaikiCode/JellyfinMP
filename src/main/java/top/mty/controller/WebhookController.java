@@ -18,8 +18,6 @@ import javax.servlet.http.HttpServletRequest;
 @Slf4j
 public class WebhookController {
   @Autowired
-  private BarkClient barkClient;
-  @Autowired
   private JellyfinWebhookService jellyfinWebhookService;
 
   @RequestMapping("/jellyfin")

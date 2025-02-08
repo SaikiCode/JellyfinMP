@@ -22,8 +22,14 @@ import top.mty.remote.param.*;
 import top.mty.utils.FileUtil;
 import top.mty.utils.GuavaCache;
 
+import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -35,7 +41,7 @@ public class JellyfinWebhookService extends ServiceImpl<JellyfinWebhookEntityMap
   private JellyfinWebhookEntityMapper mapper;
   @Value("${jellyfin.webhook.enabledNotificationTypes}")
   private String enabledNotificationTypes;
-  @Value("${jellyfin.webhook.serverTempData:/server-temp/}")
+  @Value("${jellyfin.webhook.serverTempData:server-temp}")
   private String serverTempData;
   @Autowired
   private DynamicFeignClientService dynamicFeignClientService;
@@ -266,7 +272,21 @@ public class JellyfinWebhookService extends ServiceImpl<JellyfinWebhookEntityMap
    * @return 本地文件路径
    */
   private String doImageGetAndSave(JellyfinFullControlApiClient client, String itemId, JellyfinItemImageType itemImageType) {
-    String filePath = serverTempData + itemId + "_" + itemImageType + ".jpg";
+    String currentDirectory = System.getProperty("user.dir");
+
+    // 创建temp子目录
+    Path tempDirectory = Path.of(currentDirectory, "temp");
+    if (!Files.exists(tempDirectory)) {
+        try {
+            Files.createDirectories(tempDirectory);  // 如果temp目录不存在，则创建
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    // 创建文件并保存到temp目录
+    File file = new File(tempDirectory.toFile(), itemId + "_" + itemImageType + ".jpg");
+    String filePath = file.getPath();
     try {
       ResponseEntity<byte[]> response = client.getItemImage(itemId, itemImageType.name(), new JellyfinItemImageRequest());
       if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {

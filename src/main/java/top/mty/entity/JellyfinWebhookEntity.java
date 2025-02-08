@@ -2,12 +2,14 @@ package top.mty.entity;
 
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import org.springframework.util.StringUtils;
 import top.mty.controller.data.jellyfin.webhook.JellyfinWebhookProperties;
 import top.mty.remote.param.JellyfinUserLibraryItem;
 
+import java.beans.Transient;
 import java.util.Date;
 
 @Data
@@ -102,6 +104,13 @@ public class JellyfinWebhookEntity {
    */
   @JsonProperty("itemId")
   private String itemId;
+
+    /**
+   * 更新内容描述
+   */
+  @JsonIgnore
+  @TableField(exist = false)
+  private String updateEpisodeDescription;
 
   public static JellyfinWebhookEntity toWebhookEntity(JellyfinWebhookProperties properties) {
     JellyfinWebhookEntity entity = new JellyfinWebhookEntity();
