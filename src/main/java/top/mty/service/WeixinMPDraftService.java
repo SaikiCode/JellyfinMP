@@ -114,16 +114,16 @@ public class WeixinMPDraftService {
         // 添加电影项目
         StringBuilder movieContent = new StringBuilder();
         if (processedEntities.stream().anyMatch(p -> JellyfinWebhookProperties.ITEM_TYPE_MOVIE.equals(p.getItemType()))) {
-            movieContent.append("<span style=\"font-size: 48px;\">电影:</span><br>");
+            movieContent.append("<span style=\"font-size: 48px;\">电影:</span><br /><br />");
             int index = 1;
             for (JellyfinWebhookEntity entity : processedEntities) {
                 if (JellyfinWebhookProperties.ITEM_TYPE_MOVIE.equals(entity.getItemType())) {
                     // 添加标题
-                    movieContent.append(index).append(". ").append(entity.getName()).append("(").append(entity.getYear()).append(") ")
-                            .append(findResolution(entity));
-                    // 添加分级和评分
-                    fetchExtra4ArticleContent(entity, movieContent);
-                    movieContent.append("<br>");
+                    movieContent.append("<p style=\"font-size: 20px;font-weight: bold;\">")
+                            .append(entity.getName())
+                            .append("(").append(entity.getYear()).append(") ")
+                            .append("</p>")
+                            .append("<br />");
                     // 添加图片
                     try {
                         String imageUrl = processEntityImage(entity);
@@ -146,16 +146,17 @@ public class WeixinMPDraftService {
         // 添加电视剧项目
         StringBuilder episodesContent = new StringBuilder();
         if (processedEntities.stream().anyMatch(p -> JellyfinWebhookProperties.ITEM_TYPE_SERIES.equals(p.getItemType()))) {
-            episodesContent.append("<span style=\"font-size: 48px;\">剧集:</span><br>");
+            episodesContent.append("<span style=\"font-size: 48px;\">剧集:</span><br /><br />");
             int index = 1;
             for (JellyfinWebhookEntity entity : processedEntities) {
                 if (JellyfinWebhookProperties.ITEM_TYPE_SERIES.equals(entity.getItemType())) {
                     // 添加标题
-                    episodesContent.append(index).append(". ").append(entity.getName()).append("(").append(entity.getYear()).append(") ")
-                            .append(findResolution(entity));
-                    // 添加分级和评分
-                    fetchExtra4ArticleContent(entity, episodesContent);
-                    episodesContent.append("<br>");
+                    episodesContent.append("<p style=\"font-size: 20px;font-weight: bold;\">")
+                            .append(entity.getName())
+                            .append("(").append(entity.getYear()).append(") ")
+                            .append("</p>")
+                            .append("<br />");
+
                     // 添加图片
                     try {
                         String imageUrl = processEntityImage(entity);
@@ -173,7 +174,7 @@ public class WeixinMPDraftService {
                     }
                     // 添加演员图片
                     fetchActors4ArticleContent(entity, episodesContent);
-                    if (StringUtils.hasText(entity.getSeasonEpisode())) {
+                    if (StringUtils.hasText(entity.getSeasonEpisode()) && StringUtils.hasText(entity.getUpdateEpisodeDescription())) {
                         episodesContent.append("<br />")
                                 .append(entity.getUpdateEpisodeDescription())
                                 .append("<br />");
@@ -319,12 +320,14 @@ public class WeixinMPDraftService {
                                 .append("集 - ")
                                 .append(episodeEntity.getName())
                                 .append("】")
-                                .append("</p>")
-                                .append("<p style=\"font-size: 14px;\">")
-                                .append("本集简介：")
-                                .append(episodeEntity.getOverview())
-                                .append("</p>")
-                                .append("<br />");
+                                .append("</p>");
+                        if (StringUtils.hasText(episodeEntity.getOverview())) {
+                            description.append("<p style=\"font-size: 14px;\">")
+                                    .append("本集简介：")
+                                    .append(episodeEntity.getOverview())
+                                    .append("</p>");
+                        }
+                        description.append("<br />");
                     }
                     seriesEntity.setUpdateEpisodeDescription(description.toString());
                 }
@@ -351,6 +354,25 @@ public class WeixinMPDraftService {
                 }
             } else {
                 madeSeries.setSeasonEpisode(orphanEpisode.getSeasonEpisode());
+                StringBuilder description = new StringBuilder();
+                description.append("<p style=\"font-size: 24px;font-weight: bold;\">")
+                        .append("【第")
+                        .append(orphanEpisode.getSeasonNumber())
+                        .append("季 第")
+                        .append(orphanEpisode.getEpisodeNumber())
+                        .append("集 - ")
+                        .append(orphanEpisode.getName())
+                        .append("】")
+                        .append("</p>");
+                if (StringUtils.hasText(orphanEpisode.getOverview())) {
+                    description.append("<p style=\"font-size: 14px;\">")
+                            .append("本集简介：")
+                            .append(orphanEpisode.getOverview())
+                            .append("</p>");
+                }
+                description.append("<br />");
+
+                madeSeries.setUpdateEpisodeDescription(description.toString());
                 seriesList.add(madeSeries);
             }
         }
