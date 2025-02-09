@@ -119,7 +119,7 @@ public class WeixinMPDraftService {
             for (JellyfinWebhookEntity entity : processedEntities) {
                 if (JellyfinWebhookProperties.ITEM_TYPE_MOVIE.equals(entity.getItemType())) {
                     // 添加标题
-                    movieContent.append("<p style=\"font-size: 20px;font-weight: bold;\">")
+                    movieContent.append("<p style=\"font-size: 24px;font-weight: bold;\">")
                             .append(entity.getName())
                             .append("(").append(entity.getYear()).append(") ")
                             .append("</p>")
@@ -151,7 +151,7 @@ public class WeixinMPDraftService {
             for (JellyfinWebhookEntity entity : processedEntities) {
                 if (JellyfinWebhookProperties.ITEM_TYPE_SERIES.equals(entity.getItemType())) {
                     // 添加标题
-                    episodesContent.append("<p style=\"font-size: 20px;font-weight: bold;\">")
+                    episodesContent.append("<p style=\"font-size: 24px;font-weight: bold;\">")
                             .append(entity.getName())
                             .append("(").append(entity.getYear()).append(") ")
                             .append("</p>")
@@ -312,7 +312,7 @@ public class WeixinMPDraftService {
                     List<JellyfinWebhookEntity> episodeEntities = entry.getValue();
                     episodeEntities.sort(Comparator.comparing(JellyfinWebhookEntity::getEpisodeNumber));
                     for (JellyfinWebhookEntity episodeEntity : episodeEntities) {
-                        description.append("<p style=\"font-size: 24px;font-weight: bold;\">")
+                        description.append("<p style=\"font-size: 20px;font-weight: bold;\">")
                                 .append("【第")
                                 .append(episodeEntity.getSeasonNumber())
                                 .append("季 第")
@@ -355,7 +355,7 @@ public class WeixinMPDraftService {
             } else {
                 madeSeries.setSeasonEpisode(orphanEpisode.getSeasonEpisode());
                 StringBuilder description = new StringBuilder();
-                description.append("<p style=\"font-size: 24px;font-weight: bold;\">")
+                description.append("<p style=\"font-size: 20px;font-weight: bold;\">")
                         .append("【第")
                         .append(orphanEpisode.getSeasonNumber())
                         .append("季 第")
