@@ -335,6 +335,7 @@ public class WeixinMPDraftService {
         }
         // orphanEpisodes 只有单集没有剧集信息的给他查出来series信息, 最终构造series添加到series列表中, 因为最终用来生成文章的还是series信息.
         JellyfinFullControlApiClient client = dynamicFeignClientService.getClient(JellyfinFullControlApiClient.class, CustomAppId.Jellyfin.name());
+        orphanEpisodes.sort(Comparator.comparing(JellyfinWebhookEntity::getEpisodeNumber));
         for (JellyfinWebhookEntity orphanEpisode : orphanEpisodes) {
             JellyfinUserLibraryItem item = client.getUserLibraryItem(jellyfinAdminId, orphanEpisode.getItemId());
             if (null == item) {
@@ -345,33 +346,35 @@ public class WeixinMPDraftService {
             // 查出来的series添加到series列表
             JellyfinWebhookEntity madeSeries = JellyfinWebhookEntity.toWebhookEntity(orphanEpisodeSeriesItem, orphanEpisode);
             JellyfinWebhookEntity seriesExistedInList = seriesList.stream().filter(s -> madeSeries.getSeriesName().equals(s.getName())).findFirst().orElse(null);
+
+            StringBuilder description = new StringBuilder();
+            description.append("<p style=\"font-size: 20px;font-weight: bold;\">")
+                    .append("【第")
+                    .append(orphanEpisode.getSeasonNumber())
+                    .append("季 第")
+                    .append(orphanEpisode.getEpisodeNumber())
+                    .append("集 - ")
+                    .append(orphanEpisode.getName())
+                    .append("】")
+                    .append("</p>");
+            if (StringUtils.hasText(orphanEpisode.getOverview())) {
+                description.append("<p style=\"font-size: 14px;\">")
+                        .append("本集简介：")
+                        .append(orphanEpisode.getOverview())
+                        .append("</p>");
+            }
+            description.append("<br />");
             if (null != seriesExistedInList) {
                 String seriesSeasonEpisode = seriesExistedInList.getSeasonEpisode();
                 if (StringUtils.hasText(seriesSeasonEpisode)) {
                     seriesExistedInList.setSeasonEpisode(seriesExistedInList.getSeasonEpisode() + "," + orphanEpisode.getSeasonEpisode());
+                    seriesExistedInList.setUpdateEpisodeDescription(seriesExistedInList.getUpdateEpisodeDescription() + description.toString());
                 } else {
                     seriesExistedInList.setSeasonEpisode(orphanEpisode.getSeasonEpisode());
+                    seriesExistedInList.setUpdateEpisodeDescription(description.toString());
                 }
             } else {
                 madeSeries.setSeasonEpisode(orphanEpisode.getSeasonEpisode());
-                StringBuilder description = new StringBuilder();
-                description.append("<p style=\"font-size: 20px;font-weight: bold;\">")
-                        .append("【第")
-                        .append(orphanEpisode.getSeasonNumber())
-                        .append("季 第")
-                        .append(orphanEpisode.getEpisodeNumber())
-                        .append("集 - ")
-                        .append(orphanEpisode.getName())
-                        .append("】")
-                        .append("</p>");
-                if (StringUtils.hasText(orphanEpisode.getOverview())) {
-                    description.append("<p style=\"font-size: 14px;\">")
-                            .append("本集简介：")
-                            .append(orphanEpisode.getOverview())
-                            .append("</p>");
-                }
-                description.append("<br />");
-
                 madeSeries.setUpdateEpisodeDescription(description.toString());
                 seriesList.add(madeSeries);
             }

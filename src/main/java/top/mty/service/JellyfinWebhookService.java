@@ -348,8 +348,7 @@ public class JellyfinWebhookService extends ServiceImpl<JellyfinWebhookEntityMap
    */
   private boolean allowed2Database(JellyfinWebhookEntity entity) {
     // 只有刮削过的媒体才有元数据, 才可以计入数据库
-    if (StringUtils.hasText(entity.getOverview())
-        && StringUtils.hasText(entity.getName())) {
+    if (StringUtils.hasText(entity.getName())) {
       // 如果是episode, 还要注意在tmm中重命名之前不能入库
       // 目前发现的区别是没有season_episode
       if (JellyfinWebhookProperties.ITEM_TYPE_EPISODE.equals(entity.getItemType())) {
